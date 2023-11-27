@@ -1,0 +1,26 @@
+---
+extends:
+  - standard
+  - prettier
+  - eslint:recommended
+  - plugin:node/recommended
+  - plugin:promise/recommended
+  - plugin:lodash/canonical
+plugins:
+  - import
+  - prettier
+  - standard
+  - node
+  - promise
+  - lodash
+env:
+  node: true
+  es6: true
+  jest: true
+rules:
+  prettier/prettier: error
+  lodash/chaining: [error, implicit]
+  # mis-fires when accessing multi-dimensional arrays
+  lodash/path-style: off
+parserOptions:
+  ecmaVersion: 2022
