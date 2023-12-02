@@ -47,5 +47,25 @@ export function part1(input) {
 }
 
 export function part2(input) {
-  return "TODO";
+  return _(input)
+    .map(parseLine)
+    .map((game) => {
+      return _.reduce(
+        game.rounds,
+        (acc, { red = 0, green = 0, blue = 0 }) => {
+          return {
+            red: Math.max(red, acc.red),
+            green: Math.max(green, acc.green),
+            blue: Math.max(blue, acc.blue),
+          };
+        },
+        {
+          red: 0,
+          green: 0,
+          blue: 0,
+        },
+      );
+    })
+    .map(({ red, green, blue }) => red * green * blue)
+    .sum();
 }
