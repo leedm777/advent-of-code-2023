@@ -17,11 +17,24 @@ export function part1(input) {
   );
 }
 
+function reverseString(str) {
+  return _(str).split("").reverse().join("");
+}
+
 export function parseNumbers(str) {
-  const tokens = str.match(
-    /[0-9]|one|two|three|four|five|six|seven|eight|nine/g,
+  const firstNum = str.match(
+    /[0-9]|one|two|three|four|five|six|seven|eight|nine/,
+  )[0];
+
+  // Find the last number. Double reverse the string so we handle overlaping
+  // strings
+  const lastNum = reverseString(
+    reverseString(str).match(
+      /[0-9]|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin/,
+    )[0],
   );
-  return _.map(tokens, (token) => {
+
+  return _.map([firstNum, lastNum], (token) => {
     switch (token) {
       case "one":
         return "1";

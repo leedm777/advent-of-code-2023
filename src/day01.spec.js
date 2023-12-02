@@ -13,7 +13,7 @@ const exampleInput2 = [
   "zoneight234",
   "7pqrstsixteen",
 ];
-const exampleOutput2 = ["219", "823", "123", "2134", "49872", "18234", "76"];
+const exampleOutput2 = ["29", "83", "13", "24", "42", "14", "76"];
 
 describe("day01", () => {
   describe("part 1", () => {
@@ -45,7 +45,7 @@ describe("day01", () => {
     it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);
       expect(actual).toBeLessThan(53896);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(53894);
     });
   });
 });
