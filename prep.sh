@@ -32,10 +32,18 @@ head ${input}
 cat <<EOF > src/day${day}.js
 import _ from "lodash";
 
+/**
+ * @param {Array<string>} input Puzzle input
+ * @return {string} Puzzle output
+ */
 export function part1(input) {
   return "TODO";
 }
 
+/**
+ * @param {Array<string>} input Puzzle input
+ * @return {string} Puzzle output
+ */
 export function part2(input) {
   return "TODO";
 }
