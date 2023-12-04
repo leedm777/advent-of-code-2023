@@ -49,5 +49,19 @@ export function part1(input) {
  * @return {string} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  const cards = _.map(input, parseCard);
+  const ctr = _.map(cards, _.constant(1));
+
+  for (let i = 0; i < ctr.length; ++i) {
+    const numMatches = _.intersection(
+      cards[i].scratchNumbers,
+      cards[i].winningNumbers,
+    ).length;
+
+    for (let j = i + 1; j <= i + numMatches; ++j) {
+      ctr[j] += ctr[i];
+    }
+  }
+
+  return _.sum(ctr);
 }
