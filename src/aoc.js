@@ -168,3 +168,21 @@ export function movePos(pos, offset) {
   assert.equal(pos.length, offset.length);
   return _(pos).zip(offset).map(_.sum).value();
 }
+
+export function splitArray(arr, fn) {
+  if (_.isEmpty(arr)) {
+    return [];
+  }
+
+  return _.reduce(
+    arr,
+    (acc, elem) => {
+      if (fn(elem)) {
+        return [...acc, []];
+      }
+
+      return [..._.initial(acc), [..._.last(acc), elem]];
+    },
+    [[]],
+  );
+}
