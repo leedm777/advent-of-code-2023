@@ -44,25 +44,25 @@ function parseAlmanac(input) {
   };
 }
 
-function findLocations(seeds, maps) {
+function findLocation(seed, maps) {
   let type = "seed";
-  let ids = seeds;
+  let id = seed;
   while (type !== "location") {
     const map = maps[type];
     type = map.to;
-    ids = _.map(ids, (id) => {
-      const range = _.find(
-        map.ranges,
-        ({ fromMin, fromMax }) => fromMin <= id && id < fromMax,
-      );
-      if (range) {
-        return id + range.delta;
-      }
-
-      return id;
-    });
+    const range = _.find(
+      map.ranges,
+      ({ fromMin, fromMax }) => fromMin <= id && id < fromMax,
+    );
+    if (range) {
+      id = id + range.delta;
+    }
   }
-  return ids;
+  return id;
+}
+
+function findLocations(seeds, maps) {
+  return _.map(seeds, (seed) => findLocation(seed, maps));
 }
 
 /**
@@ -81,5 +81,13 @@ export function part1(input) {
  * @return {string} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  const { seeds: seedRanges, maps } = parseAlmanac(input);
+  const seeds = _(seedRanges)
+    .chunk(2)
+    .flatMap(([start, len]) => _.range(start, start + len))
+    .value();
+
+  const ids = findLocations(seeds, maps);
+
+  return _.min(ids);
 }
