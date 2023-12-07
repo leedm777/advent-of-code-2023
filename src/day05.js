@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { splitArray } from "./aoc.js";
 import assert from "assert";
+import cliProgress from "cli-progress";
 
 function parseMap(mapSection) {
   const [titleStr, ...rangeStrs] = mapSection;
@@ -81,13 +82,27 @@ export function part1(input) {
  * @return {string} Puzzle output
  */
 export function part2(input) {
+  const bar1 = new cliProgress.SingleBar({
+    format: "progress [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}",
+    barsize: 20,
+    etaBuffer: 1_000,
+  });
   const { seeds: seedRanges, maps } = parseAlmanac(input);
-  const seeds = _(seedRanges)
-    .chunk(2)
-    .flatMap(([start, len]) => _.range(start, start + len))
-    .value();
+  const seeds = _.chunk(seedRanges, 2);
+  const totalLen = _(seeds).map(1).sum();
+  bar1.start(totalLen, 0);
 
-  const ids = findLocations(seeds, maps);
+  let minLocation = Infinity;
+  for (const [seedMin, seedLen] of seeds) {
+    for (let seed = seedMin; seed < seedMin + seedLen; ++seed) {
+      bar1.increment();
+      const location = findLocation(seed, maps);
+      if (location < minLocation) {
+        minLocation = location;
+      }
+    }
+  }
+  bar1.stop();
 
-  return _.min(ids);
+  return minLocation;
 }
