@@ -49,10 +49,28 @@ export function part1(input) {
   return _(races).map(numWaysToWin).map("waysToWin").reduce(_.multiply);
 }
 
+function parseLinePart2(line) {
+  return _.chain(line)
+    .split(/\s+/)
+    .drop(1)
+    .sum()
+    .thru((s) => _.parseInt(s, 10))
+    .value();
+}
+
+function parseRacePart2(input) {
+  const [timeLine, distanceLine] = input;
+  const raceTime = parseLinePart2(timeLine);
+  const distance = parseLinePart2(distanceLine);
+
+  return { raceTime, distance };
+}
+
 /**
  * @param {Array<string>} input Puzzle input
  * @return {string} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  const race = parseRacePart2(input);
+  return numWaysToWin(race).waysToWin;
 }
