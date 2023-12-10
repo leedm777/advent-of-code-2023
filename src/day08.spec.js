@@ -22,6 +22,19 @@ const exampleInput2 = [
   "ZZZ = (ZZZ, ZZZ)",
 ];
 
+const exampleInput3 = [
+  "LR",
+  "",
+  "11A = (11B, XXX)",
+  "11B = (XXX, 11Z)",
+  "11Z = (11B, XXX)",
+  "22A = (22B, XXX)",
+  "22B = (22C, 22C)",
+  "22C = (22Z, 22Z)",
+  "22Z = (22B, 22B)",
+  "XXX = (XXX, XXX)",
+];
+
 describe("day08", () => {
   describe("part 1", () => {
     it("should work with the first sample", () => {
@@ -38,14 +51,14 @@ describe("day08", () => {
     });
   });
 
-  describe.skip("part 2", () => {
+  describe("part 2", () => {
     it("should work with the sample", () => {
-      const actual = part2(exampleInput1);
-      expect(actual).toStrictEqual();
+      const actual = part2(exampleInput3);
+      expect(actual).toStrictEqual(6);
     });
     it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(10921547990923);
     });
   });
 });

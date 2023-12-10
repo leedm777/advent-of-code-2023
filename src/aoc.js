@@ -186,3 +186,9 @@ export function splitArray(arr, fn) {
     [[]],
   );
 }
+
+export function lcm(...arr) {
+  const gcd = (x, y) => (!y ? x : gcd(y, x % y));
+  const _lcm = (x, y) => (x * y) / gcd(x, y);
+  return _.reduce([...arr], (a, b) => _lcm(a, b));
+}
