@@ -22,14 +22,15 @@ describe("day07", () => {
     });
   });
 
-  describe.skip("part 2", () => {
+  describe("part 2", () => {
     it("should work with the sample", () => {
       const actual = part2(exampleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(5905);
     });
     it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toBeGreaterThan(252607068);
+      expect(actual).toStrictEqual(254837398);
     });
   });
 });
