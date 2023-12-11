@@ -1,7 +1,6 @@
 import _ from "lodash";
 import { splitArray } from "./aoc.js";
 import assert from "assert";
-import cliProgress from "cli-progress";
 
 function parseMap(mapSection) {
   const [titleStr, ...rangeStrs] = mapSection;
@@ -24,7 +23,7 @@ function parseMap(mapSection) {
   return {
     from,
     to,
-    ranges,
+    ranges: _.sortBy(ranges, "fromMin"),
   };
 }
 
@@ -45,20 +44,37 @@ function parseAlmanac(input) {
   };
 }
 
-function findLocation(seed, maps) {
+function findLocationAndSkip(seed, maps) {
   let type = "seed";
   let id = seed;
+  // We've got to search large ranges of numbers, so we'll take advantage of
+  // the fact that these ranges are _mostly_ linear. When we find a mapping,
+  // we know the output will increase at least until the current range ends,
+  // or a new range begins. Keep track of this so we can skip through the
+  // ranges.
+  let skip = Infinity;
   while (type !== "location") {
     const map = maps[type];
     type = map.to;
-    const range = _.find(
-      map.ranges,
-      ({ fromMin, fromMax }) => fromMin <= id && id < fromMax,
-    );
-    if (range) {
-      id = id + range.delta;
+    for (let rangeIdx = 0; rangeIdx < map.ranges.length; ++rangeIdx) {
+      const range = map.ranges[rangeIdx];
+
+      if (range.fromMin <= id && id < range.fromMax) {
+        skip = Math.min(skip, range.fromMax - id);
+        id = id + range.delta;
+        break;
+      }
+
+      if (id < range.fromMin) {
+        skip = Math.min(skip, range.fromMin - id);
+      }
     }
   }
+  return { id, skip };
+}
+
+function findLocation(seed, maps) {
+  const { id } = findLocationAndSkip(seed, maps);
   return id;
 }
 
@@ -82,27 +98,19 @@ export function part1(input) {
  * @return {string} Puzzle output
  */
 export function part2(input) {
-  const bar1 = new cliProgress.SingleBar({
-    format: "progress [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}",
-    barsize: 20,
-    etaBuffer: 1_000,
-  });
   const { seeds: seedRanges, maps } = parseAlmanac(input);
   const seeds = _.chunk(seedRanges, 2);
-  const totalLen = _(seeds).map(1).sum();
-  bar1.start(totalLen, 0);
 
   let minLocation = Infinity;
   for (const [seedMin, seedLen] of seeds) {
-    for (let seed = seedMin; seed < seedMin + seedLen; ++seed) {
-      bar1.increment();
-      const location = findLocation(seed, maps);
+    for (let seed = seedMin; seed < seedMin + seedLen; ) {
+      const { id: location, skip } = findLocationAndSkip(seed, maps);
       if (location < minLocation) {
         minLocation = location;
       }
+      seed += skip;
     }
   }
-  bar1.stop();
 
   return minLocation;
 }

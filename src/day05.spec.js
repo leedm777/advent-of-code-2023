@@ -55,9 +55,9 @@ describe("day05", () => {
       const actual = part2(exampleInput);
       expect(actual).toStrictEqual(46);
     });
-    it.skip("should work with the puzzle input", () => {
+    it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(37806486);
     });
   });
 });
