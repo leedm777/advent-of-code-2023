@@ -32,10 +32,15 @@ export function part1(input) {
   return _(sequences).map(nextValue).sum();
 }
 
+function priorValue(sequence) {
+  return nextValue(_.reverse(sequence));
+}
+
 /**
  * @param {Array<string>} input Puzzle input
  * @return {string} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  const sequences = _.map(input, parseSequence);
+  return _(sequences).map(priorValue).sum();
 }
