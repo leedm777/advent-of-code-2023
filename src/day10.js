@@ -77,25 +77,25 @@ function parsePipes(input) {
 function neighbors(grid, node) {
   const r = [];
   const { x, y } = node.coord;
-  const northCell = _.get(grid, [y - 1, x], {});
-  const southCell = _.get(grid, [y + 1, x], {});
-  const westCell = _.get(grid, [y, x - 1], {});
-  const eastCell = _.get(grid, [y, x + 1], {});
+  const northTile = _.get(grid, [y - 1, x], {});
+  const southTile = _.get(grid, [y + 1, x], {});
+  const westTile = _.get(grid, [y, x - 1], {});
+  const eastTile = _.get(grid, [y, x + 1], {});
 
-  if (node.north && northCell.south) {
-    r.push(northCell);
+  if (node.north && northTile.south) {
+    r.push(northTile);
   }
 
-  if (node.south && southCell.north) {
-    r.push(southCell);
+  if (node.south && southTile.north) {
+    r.push(southTile);
   }
 
-  if (node.west && westCell.east) {
-    r.push(westCell);
+  if (node.west && westTile.east) {
+    r.push(westTile);
   }
 
-  if (node.east && eastCell.west) {
-    r.push(eastCell);
+  if (node.east && eastTile.west) {
+    r.push(eastTile);
   }
 
   assert.equal(r.length, 2, "Could not find the proper number of neighbors");
