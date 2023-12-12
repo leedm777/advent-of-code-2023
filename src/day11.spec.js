@@ -27,14 +27,18 @@ describe("day11", () => {
     });
   });
 
-  describe.skip("part 2", () => {
-    it("should work with the sample", () => {
-      const actual = part2(exampleInput);
-      expect(actual).toStrictEqual();
+  describe("part 2", () => {
+    it("should work with the sample and expansion of 10", () => {
+      const actual = part2(exampleInput, 10);
+      expect(actual).toStrictEqual(1030);
+    });
+    it("should work with the sample and expansion of 100", () => {
+      const actual = part2(exampleInput, 100);
+      expect(actual).toStrictEqual(8410);
     });
     it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(678728808158);
     });
   });
 });

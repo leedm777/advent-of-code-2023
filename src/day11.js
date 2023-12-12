@@ -37,12 +37,8 @@ function parseStarChart(input) {
   };
 }
 
-/**
- * @param {Array<string>} input Puzzle input
- * @return {string} Puzzle output
- */
-export function part1(input) {
-  const { galaxies, emptyRows, emptyColumns } = parseStarChart(input);
+function computeTotalDistance(starChart, expansion = 2) {
+  const { galaxies, emptyRows, emptyColumns } = starChart;
   let totalDistance = 0;
   for (let i = 0; i < _.size(galaxies); ++i) {
     const g1 = galaxies[i];
@@ -50,14 +46,16 @@ export function part1(input) {
       const g2 = galaxies[j];
       let distance = 0;
       for (let x = Math.min(g1.x, g2.x); x < Math.max(g1.x, g2.x); ++x) {
-        ++distance;
         if (_.includes(emptyColumns, x)) {
+          distance += expansion;
+        } else {
           ++distance;
         }
       }
       for (let y = Math.min(g1.y, g2.y); y < Math.max(g1.y, g2.y); ++y) {
-        ++distance;
         if (_.includes(emptyRows, y)) {
+          distance += expansion;
+        } else {
           ++distance;
         }
       }
@@ -73,6 +71,16 @@ export function part1(input) {
  * @param {Array<string>} input Puzzle input
  * @return {string} Puzzle output
  */
-export function part2(input) {
-  return "TODO";
+export function part1(input) {
+  const starChart = parseStarChart(input);
+  return computeTotalDistance(starChart);
+}
+
+/**
+ * @param {Array<string>} input Puzzle input
+ * @return {string} Puzzle output
+ */
+export function part2(input, expansion = 1_000_000) {
+  const starChart = parseStarChart(input);
+  return computeTotalDistance(starChart, expansion);
 }
