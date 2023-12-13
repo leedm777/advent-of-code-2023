@@ -40,16 +40,20 @@ function parseRecord(line) {
   };
 }
 
-function countArrangements(record) {
+function countArrangements(record, idx) {
   const counts = _.countBy(record.condition);
   const totalDamaged = _.sum(record.damagedGroups);
   const numUnknown = _.get(counts, UNKNOWN, 0);
   const numUnknownDamaged = totalDamaged - _.get(counts, DAMAGED, 0);
 
+  if (numUnknownDamaged === 0) {
+    return 1;
+  }
+
   // set a bit per damaged spring
   let i = (1 << numUnknownDamaged) - 1;
 
-  const guesses = [];
+  let numGuesses = 0;
 
   // and iterate through all combinations of those bits
   while (i < 1 << numUnknown) {
@@ -77,13 +81,13 @@ function countArrangements(record) {
 
     const runLengths = _.map(guess.acc.match(/#+/g), _.size);
     if (_.isEqual(runLengths, record.damagedGroups)) {
-      guesses.push(guess.acc);
+      ++numGuesses;
     }
 
     i = snoob(i);
   }
 
-  return guesses.length;
+  return numGuesses;
 }
 
 /**
