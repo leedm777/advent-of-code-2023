@@ -98,10 +98,20 @@ export function part1(input) {
   return _(input).map(parseRecord).map(countArrangements).sum();
 }
 
+function fiveX(line) {
+  const [conditionStr, damagedGroupsStr] = _.split(line, " ");
+  const fiveCondition = _(5).range().map(_.constant(conditionStr)).join("?");
+  const fiveDamagedGroupsStr = _(5)
+    .range()
+    .map(_.constant(damagedGroupsStr))
+    .join(",");
+  return `${fiveCondition} ${fiveDamagedGroupsStr}`;
+}
+
 /**
  * @param {Array<string>} input Puzzle input
  * @return {string} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  return _(input).map(fiveX).map(parseRecord).map(countArrangements).value();
 }
