@@ -1,7 +1,10 @@
 import { findReflection, part1, part2, transposeGrid } from "./day13";
 import { readInput } from "./aoc";
+import * as aoc from "./aoc.js";
+import _ from "lodash";
 
 const puzzleInput = readInput("./src/day13.txt");
+const grids = aoc.splitArray(puzzleInput, _.isEmpty);
 const exampleInput = [
   "#.##..##.",
   "..#.##.#.",
@@ -89,14 +92,18 @@ describe("day13", () => {
     });
   });
 
-  describe.skip("part 2", () => {
+  describe("part 2", () => {
     it("should work with the sample", () => {
       const actual = part2(exampleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(400);
+    });
+    it("should work on grid 3", () => {
+      const actual = part2(grids[2]);
+      expect(actual).toStrictEqual(2);
     });
     it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(37453);
     });
   });
 });
