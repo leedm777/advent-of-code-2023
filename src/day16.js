@@ -131,15 +131,20 @@ function scoreBeamMap(beamMap) {
     .sum();
 }
 
+function scoreBeam(splitters, beam) {
+  let beamMap = initBeamMap(splitters, beam);
+  beamMap = illuminate(beamMap);
+  return scoreBeamMap(beamMap);
+}
+
 /**
  * @param {Array<string>} input Puzzle input
  * @return {number} Puzzle output
  */
 export function part1(input) {
   const splitters = parseSplitters(input);
-  let beamMap = initBeamMap(splitters, { coord: [0, 0], dir: "east" });
-  beamMap = illuminate(beamMap);
-  return scoreBeamMap(beamMap);
+  const beam = { coord: [0, 0], dir: "east" };
+  return scoreBeam(splitters, beam);
 }
 
 /**
@@ -147,5 +152,27 @@ export function part1(input) {
  * @return {string} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  let maxScore = 0;
+  const splitters = parseSplitters(input);
+  const numRows = splitters.length;
+  const numCols = splitters[0].length;
+
+  for (let row = 0; row < numRows; ++row) {
+    const scoreLeft = scoreBeam(splitters, { coord: [row, 0], dir: "east" });
+    const scoreRight = scoreBeam(splitters, {
+      coord: [row, numCols - 1],
+      dir: "west",
+    });
+
+    maxScore = _.max([maxScore, scoreLeft, scoreRight]);
+  }
+
+  for (let col = 0; col < numCols; ++col) {
+    const scoreTop = scoreBeam(splitters, { coord: [0, col], dir: "south" });
+    const scoreBottom = scoreBeam(splitters, { coord: [0, col], dir: "south" });
+
+    maxScore = _.max([maxScore, scoreTop, scoreBottom]);
+  }
+
+  return maxScore;
 }
