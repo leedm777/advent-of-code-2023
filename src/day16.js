@@ -5,18 +5,17 @@ function beamToString({ coord: [y, x], dir }) {
   return `[${y},${x}]-${dir}`;
 }
 
-function parseBeams(input) {
-  const splitters = _.map(input, (line) => _.map(line));
-  const energized = _.map(input, (line) => _.map(line, _.constant(0)));
+function parseSplitters(input) {
+  return _.map(input, (line) => _.map(line));
+}
+
+function initBeamMap(splitters, beam) {
+  const energized = _.map(splitters, (line) => _.map(line, _.constant(0)));
+
   const seen = new Set();
-  energized[0][0] = 1;
 
-  const beam = {
-    coord: [0, 0],
-    dir: "east",
-  };
+  _.set(energized, beam.coord, 1);
   seen.add(beamToString(beam));
-
   return {
     splitters,
     energized,
@@ -119,18 +118,28 @@ function step({ splitters, energized, seen, beams }) {
   return { splitters, energized, seen, beams };
 }
 
+function illuminate(beamMap) {
+  while (!_.isEmpty(beamMap.beams)) {
+    beamMap = step(beamMap);
+  }
+  return beamMap;
+}
+
+function scoreBeamMap(beamMap) {
+  return _(beamMap.energized)
+    .map((row) => _.filter(row, (n) => n > 0).length)
+    .sum();
+}
+
 /**
  * @param {Array<string>} input Puzzle input
  * @return {number} Puzzle output
  */
 export function part1(input) {
-  let beamMap = parseBeams(input);
-  while (!_.isEmpty(beamMap.beams)) {
-    beamMap = step(beamMap);
-  }
-  return _(beamMap.energized)
-    .map((row) => _.filter(row, (n) => n > 0).length)
-    .sum();
+  const splitters = parseSplitters(input);
+  let beamMap = initBeamMap(splitters, { coord: [0, 0], dir: "east" });
+  beamMap = illuminate(beamMap);
+  return scoreBeamMap(beamMap);
 }
 
 /**
