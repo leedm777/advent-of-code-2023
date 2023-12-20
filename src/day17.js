@@ -7,7 +7,7 @@ class Graph {
     this.goal = [this.grid.length - 1, this.grid[0].length - 1];
     this.h = aoc.manhattanHeuristic(this.goal);
     this.h = aoc.dijkstraHeuristic;
-    this.start = { coord: [0, 0], dir: [-1, -1], stepsStraight: 0 };
+    this.start = { coord: [0, 0], dir: [-1, -1], stepsStraight: 0, init: true };
   }
 
   isGoal({ coord }) {
@@ -87,10 +87,99 @@ export function part1(input) {
     .sum();
 }
 
+class UltraGraph extends Graph {
+  isGoal({ coord, stepsStraight }) {
+    return stepsStraight >= 4 && _.isEqual(coord, this.goal);
+  }
+
+  getNeighbors({ coord, dir, stepsStraight, init }) {
+    let dirs;
+
+    if (init) {
+      // no momentum and starting at 0,0, so pick the two directions available
+      dirs = [
+        [1, 0],
+        [0, 1],
+      ];
+    } else {
+      dirs = [
+        [1, 0],
+        [0, 1],
+        [-1, 0],
+        [0, -1],
+      ];
+    }
+
+    return (
+      _(dirs)
+        .map((neighborDir) => ({
+          coord: aoc.movePos(coord, neighborDir),
+          dir: neighborDir,
+          stepsStraight: _.isEqual(neighborDir, dir) ? stepsStraight + 1 : 1,
+        }))
+        .filter(
+          ({
+            coord: [y, x],
+            dir: nextDir,
+            stepsStraight: nextStepsStraight,
+          }) => {
+            // it needs to move a minimum of four blocks in that direction before it can turn
+            if (!init && stepsStraight < 4 && nextStepsStraight === 1) {
+              return false;
+            }
+
+            // can move a maximum of ten consecutive blocks without turning
+            if (nextStepsStraight > 10) {
+              return false;
+            }
+
+            // don't go back
+            if (
+              _.isEqual(
+                nextDir,
+                _.map(dir, (x) => -x),
+              )
+            ) {
+              return false;
+            }
+
+            // and stay on the grid
+            return (
+              y >= 0 &&
+              y < this.grid.length &&
+              x >= 0 &&
+              x < this.grid[0].length
+            );
+          },
+        )
+        // .tap((n) => {
+        //   console.log(`${JSON.stringify(coord)} => ${JSON.stringify(n)}`);
+        // })
+        .value()
+    );
+  }
+}
+
 /**
  * @param {Array<string>} input Puzzle input
  * @return {number} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  const g = new UltraGraph(input);
+  const path = aoc.findPath(g);
+
+  const x = _.map(g.grid, (line) => _.map(line, _.constant(".")));
+
+  _.forEach(path, ({ coord, stepsStraight }) => _.set(x, coord, stepsStraight));
+
+  console.log(
+    _(x)
+      .map((row) => _.join(row, ""))
+      .join("\n"),
+  );
+
+  return _(path)
+    .drop(1)
+    .map(({ coord }) => _.get(g.grid, coord))
+    .sum();
 }

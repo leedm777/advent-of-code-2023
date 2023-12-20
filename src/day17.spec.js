@@ -17,6 +17,13 @@ const exampleInput = [
   "2546548887735",
   "4322674655533",
 ];
+const unfortunateExampleInput = [
+  "111111111111",
+  "999999999991",
+  "999999999991",
+  "999999999991",
+  "999999999991",
+];
 
 describe("day17", () => {
   describe("part 1", () => {
@@ -30,14 +37,19 @@ describe("day17", () => {
     });
   });
 
-  describe.skip("part 2", () => {
+  describe("part 2", () => {
     it("should work with the sample", () => {
       const actual = part2(exampleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(94);
+    });
+    it("should work with the unfortunate sample", () => {
+      const actual = part2(unfortunateExampleInput);
+      expect(actual).toStrictEqual(71);
     });
     it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toBeLessThan(1094);
+      expect(actual).toStrictEqual(1063);
     });
   });
 });
