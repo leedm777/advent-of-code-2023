@@ -69,18 +69,6 @@ export function part1(input) {
   const g = new Graph(input);
   const path = aoc.findPath(g);
 
-  const x = _.map(g.grid, (line) => _.map(line, _.constant(".")));
-
-  _.forEach(path, ({ coord, stepsStraight }) =>
-    _.set(x, coord, stepsStraight + 1),
-  );
-
-  console.log(
-    _(x)
-      .map((row) => _.join(row, ""))
-      .join("\n"),
-  );
-
   return _(path)
     .drop(1)
     .map(({ coord }) => _.get(g.grid, coord))
@@ -167,16 +155,6 @@ class UltraGraph extends Graph {
 export function part2(input) {
   const g = new UltraGraph(input);
   const path = aoc.findPath(g);
-
-  const x = _.map(g.grid, (line) => _.map(line, _.constant(".")));
-
-  _.forEach(path, ({ coord, stepsStraight }) => _.set(x, coord, stepsStraight));
-
-  console.log(
-    _(x)
-      .map((row) => _.join(row, ""))
-      .join("\n"),
-  );
 
   return _(path)
     .drop(1)
