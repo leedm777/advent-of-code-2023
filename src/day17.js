@@ -7,23 +7,14 @@ class Graph {
     this.goal = [this.grid.length - 1, this.grid[0].length - 1];
     this.h = aoc.manhattanHeuristic(this.goal);
     this.h = aoc.dijkstraHeuristic;
-    this.start = [0, 0];
+    this.start = { coord: [0, 0], dir: [-1, -1], stepsStraight: 0 };
   }
 
-  isGoal(coord) {
+  isGoal({ coord }) {
     return _.isEqual(coord, this.goal);
   }
 
-  getNeighbors(coord, cameFrom) {
-    const back1 = cameFrom[this.keyify(coord)];
-    const back2 = back1 && cameFrom[this.keyify(back1)];
-    const back3 = back2 && cameFrom[this.keyify(back2)];
-
-    const dir3 = back3 && [coord[0] - back3[0], coord[1] - back3[1]];
-
-    const mustTurnFrom =
-      dir3 && (dir3[0] === 0 || dir3[1] === 0) && _.map(dir3, (v) => v / 3);
-
+  getNeighbors({ coord, dir, stepsStraight }) {
     const dirs = [
       [-1, 0],
       [1, 0],
@@ -32,13 +23,27 @@ class Graph {
     ];
 
     return _(dirs)
-      .filter((dir) => !_.isEqual(dir, mustTurnFrom))
-      .map((dir) => aoc.movePos(coord, dir))
-      .filter((next) => {
-        if (_.isEqual(back1, next)) {
+      .map((neighborDir) => ({
+        coord: aoc.movePos(coord, neighborDir),
+        dir: neighborDir,
+        stepsStraight: _.isEqual(neighborDir, dir) ? stepsStraight + 1 : 0,
+      }))
+      .filter(({ coord: [y, x], dir: neighborDir, stepsStraight }) => {
+        // Can move at most three blocks in a single direction before it must
+        // turn 90 degrees left or right
+        if (stepsStraight >= 3) {
           return false;
         }
-        const [y, x] = next;
+        // don't go back
+        if (
+          _.isEqual(
+            neighborDir,
+            _.map(dir, (x) => -x),
+          )
+        ) {
+          return false;
+        }
+        // and stay on the grid
         return (
           y >= 0 && y < this.grid.length && x >= 0 && x < this.grid[0].length
         );
@@ -46,8 +51,9 @@ class Graph {
       .value();
   }
 
-  getNeighborDistance(c1, c2) {
-    return _.get(this.grid, c2);
+  getNeighborDistance(c1, { coord, stepsStraight }) {
+    // prefer shorter straight distances so we have more options for turning soon
+    return _.get(this.grid, coord);
   }
 
   keyify(coord) {
@@ -65,7 +71,9 @@ export function part1(input) {
 
   const x = _.map(g.grid, (line) => _.map(line, _.constant(".")));
 
-  _.forEach(path, (coord) => _.set(x, coord, _.get(g.grid, coord)));
+  _.forEach(path, ({ coord, stepsStraight }) =>
+    _.set(x, coord, stepsStraight + 1),
+  );
 
   console.log(
     _(x)
@@ -75,7 +83,7 @@ export function part1(input) {
 
   return _(path)
     .drop(1)
-    .map((coord) => _.get(g.grid, coord))
+    .map(({ coord }) => _.get(g.grid, coord))
     .sum();
 }
 
