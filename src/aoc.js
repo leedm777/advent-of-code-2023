@@ -102,7 +102,7 @@ export function manhattanHeuristic(goal) {
  *  - isGoal: (T) -> bool - Returns true if a node is the goal
  *  - h: (T) -> Number - Heuristic to optimize the path, if possible
  *  - getNeighbors: (T) -> Array<T> - Function to get the neighbors of a Node
- *  - getNeighborDistance: (T) -> Number - Returns distance to neighbor
+ *  - getNeighborDistance: (T, T) -> Number - Returns distance to neighbor
  *  - keyify: (T) -> string - Converts a node into a string to use as a key
  *
  * @param graph Graph of the maze to solve.
@@ -123,7 +123,7 @@ export function findPath(graph) {
 
   let current = open.extract();
   while (current && !graph.isGoal(current)) {
-    const neighbors = graph.getNeighbors(current);
+    const neighbors = graph.getNeighbors(current, cameFrom);
     for (const neighbor of neighbors) {
       const cost =
         getCost(current) + graph.getNeighborDistance(current, neighbor);
