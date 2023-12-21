@@ -83,7 +83,7 @@ describe("day10", () => {
     });
   });
 
-  describe.skip("part 2", () => {
+  describe("part 2", () => {
     it.each(exampleInputs2)(
       "should work with the sample %s",
       (exampleInput, expected) => {
@@ -93,7 +93,7 @@ describe("day10", () => {
     );
     it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);
-      expect(actual).toStrictEqual();
+      expect(actual).toStrictEqual(501);
     });
   });
 });

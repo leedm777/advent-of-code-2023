@@ -9,6 +9,7 @@ function parsePipes(input) {
         case "|":
           // | is a vertical pipe connecting north and south.
           return {
+            ch,
             coord: { x, y },
             north: true,
             south: true,
@@ -16,6 +17,7 @@ function parsePipes(input) {
         case "-":
           // - is a horizontal pipe connecting east and west.
           return {
+            ch,
             coord: { x, y },
             east: true,
             west: true,
@@ -23,6 +25,7 @@ function parsePipes(input) {
         case "L":
           // L is a 90-degree bend connecting north and east.
           return {
+            ch,
             coord: { x, y },
             north: true,
             east: true,
@@ -30,6 +33,7 @@ function parsePipes(input) {
         case "J":
           // J is a 90-degree bend connecting north and west.
           return {
+            ch,
             coord: { x, y },
             north: true,
             west: true,
@@ -37,6 +41,7 @@ function parsePipes(input) {
         case "7":
           // 7 is a 90-degree bend connecting south and west.
           return {
+            ch,
             coord: { x, y },
             south: true,
             west: true,
@@ -44,6 +49,7 @@ function parsePipes(input) {
         case "F":
           // F is a 90-degree bend connecting south and east.
           return {
+            ch,
             coord: { x, y },
             south: true,
             east: true,
@@ -51,22 +57,28 @@ function parsePipes(input) {
         case ".":
           // . is ground; there is no pipe in this tile.
           return {
+            ch,
             coord: { x, y },
             ground: true,
           };
         case "S":
-          // S is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
+          // S is the starting position of the animal; there is a pipe on this
+          // tile, but your sketch doesn't show what shape the pipe has.
           start = {
+            ch,
             coord: { x, y },
-            north: true,
-            south: true,
-            east: true,
-            west: true,
           };
           return start;
       }
     }),
   );
+
+  // figure out the start directions
+  start.north =
+    start.coord.y > 0 && grid[start.coord.y - 1][start.coord.x].south;
+  start.south = grid[start.coord.y + 1][start.coord.x].north;
+  start.west = start.coord.x > 0 && grid[start.coord.y][start.coord.x - 1].east;
+  start.east = grid[start.coord.y][start.coord.x + 1].west;
 
   return {
     grid,
@@ -137,5 +149,45 @@ export function part1(input) {
  * @return {string} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  const { grid, start } = parsePipes(input);
+  // find the loop so we can avoid junk
+  let priorLeft = start;
+  let priorRight = start;
+  let [left, right] = neighbors(grid, start);
+  start.isLoop = true;
+  left.isLoop = true;
+  right.isLoop = true;
+
+  while (left !== right) {
+    const oldLeft = left;
+    const oldRight = right;
+
+    left = step(grid, left, priorLeft);
+    right = step(grid, right, priorRight);
+    priorLeft = oldLeft;
+    priorRight = oldRight;
+    left.isLoop = true;
+    right.isLoop = true;
+  }
+
+  // We can use the even-odd rule to count edges to determine inside vs outside
+  let insideNorth = false;
+  let insideSouth = false;
+  let ctr = 0;
+  for (const row of grid) {
+    for (const cell of row) {
+      if ((cell.ground || !cell.isLoop) && insideNorth && insideSouth) {
+        ++ctr;
+        cell.ch = "I";
+      }
+      if (cell.north && cell.isLoop) {
+        insideNorth = !insideNorth;
+      }
+      if (cell.south && cell.isLoop) {
+        insideSouth = !insideSouth;
+      }
+    }
+  }
+
+  return ctr;
 }
