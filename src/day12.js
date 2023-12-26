@@ -1,93 +1,137 @@
 import _ from "lodash";
+import assert from "assert";
 
 const DAMAGED = "#";
 const GOOD = ".";
 const UNKNOWN = "?";
 
-/**
- * Same number of one bits. From https://www.geeksforgeeks.org/next-higher-number-with-same-number-of-set-bits/
- *
- * @param {number} x Number
- * @return {number} Next number with the same number of bits set
- */
-function snoob(x) {
-  let next = 0;
-
-  if (x > 0) {
-    const rightOne = x & -x;
-
-    const nextHigherOneBit = x + rightOne;
-
-    let rightOnesPattern = x ^ nextHigherOneBit;
-
-    rightOnesPattern = rightOnesPattern / rightOne;
-
-    rightOnesPattern >>= 2;
-
-    next = nextHigherOneBit | rightOnesPattern;
-  }
-  return next;
-}
-
 function parseRecord(line) {
+  // console.log(line);
   const [conditionStr, damagedGroupsStr] = _.split(line, " ");
+  const condition = _.map(conditionStr);
+  // Logic is simpler if we end on a good spring
+  if (_.last(condition) !== GOOD) {
+    condition.push(GOOD);
+  }
+  const damagedGroups = _(damagedGroupsStr)
+    .split(",")
+    .map((s) => _.parseInt(s, 10))
+    .value();
+  const totalDamaged = _.sum(damagedGroups);
+  const knownDamaged = _(condition)
+    .filter((ch) => ch === DAMAGED)
+    .size();
+  const totalUnknown = _(condition)
+    .filter((ch) => ch === UNKNOWN)
+    .size();
   return {
-    condition: _.map(conditionStr),
-    damagedGroups: _(damagedGroupsStr)
-      .split(",")
-      .map((s) => _.parseInt(s, 10))
-      .value(),
+    condition,
+    damagedGroups,
+    totalDamaged,
+    knownDamaged,
+    totalUnknown,
+    conditionIdx: 0,
+    ch: condition[0],
+    damagedGroupIdx: 0,
+    damagedCtr: 0,
   };
 }
 
-function countArrangements(record, idx) {
-  const counts = _.countBy(record.condition);
-  const totalDamaged = _.sum(record.damagedGroups);
-  const numUnknown = _.get(counts, UNKNOWN, 0);
-  const numUnknownDamaged = totalDamaged - _.get(counts, DAMAGED, 0);
-
-  if (numUnknownDamaged === 0) {
+function countArrangements(record) {
+  const {
+    condition,
+    damagedGroups,
+    totalDamaged,
+    knownDamaged,
+    totalUnknown,
+    conditionIdx,
+    ch,
+    damagedGroupIdx,
+    damagedCtr,
+  } = record;
+  // console.log(`[${conditionIdx}] = ${ch}`);
+  // met the end of both lists; found a working arrangement
+  if (
+    conditionIdx === condition.length &&
+    damagedGroupIdx === damagedGroups.length
+  ) {
+    // console.log("  SUCCESS");
     return 1;
   }
 
-  // set a bit per damaged spring
-  let i = (1 << numUnknownDamaged) - 1;
-
-  let numGuesses = 0;
-
-  // and iterate through all combinations of those bits
-  while (i < 1 << numUnknown) {
-    const guess = _.reduce(
-      record.condition,
-      ({ acc, guessBits }, ch) => {
-        if (ch === UNKNOWN) {
-          const g = guessBits & 1 ? DAMAGED : GOOD;
-          return {
-            acc: acc + g,
-            guessBits: guessBits >> 1,
-          };
-        }
-
-        return {
-          acc: acc + ch,
-          guessBits,
-        };
-      },
-      {
-        acc: "",
-        guessBits: i,
-      },
-    );
-
-    const runLengths = _.map(guess.acc.match(/#+/g), _.size);
-    if (_.isEqual(runLengths, record.damagedGroups)) {
-      ++numGuesses;
-    }
-
-    i = snoob(i);
+  // if there's more damaged springs than we're supposed to have, then bail
+  if (knownDamaged > totalDamaged) {
+    // console.log("  Too much damage");
+    return 0;
   }
 
-  return numGuesses;
+  // if there's not enough damaged springs, then bail
+  if (knownDamaged + totalUnknown < totalDamaged) {
+    // console.log("  Too little damage");
+    return 0;
+  }
+
+  // if unknown, try both good and damaged
+  if (ch === UNKNOWN) {
+    const goodCount = countArrangements({
+      ...record,
+      ch: GOOD,
+      totalUnknown: totalUnknown - 1,
+    });
+    const damagedCount = countArrangements({
+      ...record,
+      ch: DAMAGED,
+      knownDamaged: knownDamaged + 1,
+      totalUnknown: totalUnknown - 1,
+    });
+
+    return goodCount + damagedCount;
+  }
+
+  // if damaged, bump the counter
+  if (ch === DAMAGED) {
+    // if we've already seen too much damage, then bail
+    if (damagedCtr >= damagedGroups[damagedGroupIdx]) {
+      // console.log(`  Too much damage for group ${damagedGroupIdx}`);
+      return 0;
+    }
+
+    return countArrangements({
+      ...record,
+      damagedCtr: damagedCtr + 1,
+      ch: condition[conditionIdx + 1],
+      conditionIdx: conditionIdx + 1,
+    });
+  }
+
+  // if good, then check the damage counter
+  if (ch === GOOD) {
+    // if we're not tracking any damage, keep looking
+    if (damagedCtr === 0) {
+      return countArrangements({
+        ...record,
+        ch: condition[conditionIdx + 1],
+        conditionIdx: conditionIdx + 1,
+      });
+    }
+
+    // if damage does not match, bail
+    if (damagedCtr !== damagedGroups[damagedGroupIdx]) {
+      // console.log(`  Wrong damage (${damagedCtr})for group ${damagedGroupIdx}`);
+      return 0;
+    }
+
+    // good match; keep looking
+    return countArrangements({
+      ...record,
+      ch: condition[conditionIdx + 1],
+      conditionIdx: conditionIdx + 1,
+      damagedCtr: 0,
+      damagedGroupIdx: damagedGroupIdx + 1,
+    });
+  }
+
+  assert.fail(`Unexpected spring ${ch}`);
 }
 
 /**
@@ -110,8 +154,8 @@ function fiveX(line) {
 
 /**
  * @param {Array<string>} input Puzzle input
- * @return {string} Puzzle output
+ * @return {number} Puzzle output
  */
 export function part2(input) {
-  return _(input).map(fiveX).map(parseRecord).map(countArrangements).value();
+  return _(input).map(fiveX).map(parseRecord).map(countArrangements).sum();
 }
