@@ -33,7 +33,7 @@ describe("day20", () => {
     });
   });
 
-  describe.skip("part 2", () => {
+  describe("part 2", () => {
     // No sample for part 2
     it("should work with the puzzle input", () => {
       const actual = part2(puzzleInput);

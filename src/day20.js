@@ -47,11 +47,16 @@ function pushButton(modules) {
   const ctr = {
     high: 0,
     low: 0,
+    rxLow: 0,
   };
   const signals = [{ dest: "broadcaster", sig: LOW, from: "button" }];
   while (!_.isEmpty(signals)) {
     const { dest, sig, from } = signals.shift();
     ++ctr[sig];
+    if (dest === "rx" && sig === LOW) {
+      ++ctr.rxLow;
+    }
+
     const module = modules[dest];
 
     switch (module?.type) {
@@ -120,8 +125,18 @@ export function part1(input) {
 
 /**
  * @param {Array<string>} input Puzzle input
- * @return {string} Puzzle output
+ * @return {number} Puzzle output
  */
 export function part2(input) {
-  return "TODO";
+  let ctr = 0;
+  let rxLow = 0;
+  const modules = _(input).map(parseModule).keyBy("label").value();
+  connectConjuctions(modules);
+
+  while (rxLow !== 1) {
+    ++ctr;
+    rxLow = pushButton(modules).rxLow;
+  }
+
+  return ctr;
 }
